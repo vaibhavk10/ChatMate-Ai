@@ -351,7 +351,6 @@ body {
     0%, 80%, 100% { transform: translateY(0); }
     40% { transform: translateY(-4px); }
 }
-
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
     .sidebar {
@@ -403,6 +402,7 @@ body {
         padding: 15px;
         padding-bottom: 100px; /* Extra space for input */
         height: calc(100vh - 140px);
+        overflow-y: auto;
     }
 
     /* Message adjustments */
@@ -413,7 +413,7 @@ body {
 
     /* Input area adjustments */
     .chat-input {
-        position: fixed;
+        position: sticky;
         bottom: 0;
         left: 0;
         right: 0;
@@ -421,17 +421,33 @@ body {
         background-color: var(--background-dark);
         box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
         z-index: 100;
+        display: flex;
+        gap: 10px;
+        align-items: center;
     }
 
     #user-input {
+        flex-grow: 1;
         padding: 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background-color: rgba(255, 255, 255, 0.05);
+        color: var(--text-color);
+        resize: none;
+        min-height: 45px;
         max-height: 100px;
-        min-height: 40px;
+        font-family: inherit;
+        font-size: 1em;
     }
 
     #send-button {
         padding: 12px 20px;
         min-width: 60px;
+        background-color: var(--primary-color);
+        border: none;
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
     }
 
     /* Code block adjustments */
@@ -545,34 +561,6 @@ body {
     }
 }
 
-/* Fix the bottom input area */
-.chat-input {
-    position: sticky;
-    bottom: 0;
-    padding: 15px 20px;
-    background-color: var(--background-dark);
-    display: flex;
-    gap: 15px;
-    align-items: center;
-    border-top: 1px solid var(--border-color);
-    margin: 0;
-    padding-bottom: 0.7rem;
-}
-
-#user-input {
-    flex-grow: 1;
-    padding: 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background-color: rgba(255, 255, 255, 0.05);
-    color: var(--text-color);
-    resize: none;
-    min-height: 45px;
-    max-height: 200px;
-    font-family: inherit;
-    font-size: 1em;
-}
-
 /* Fix the sidebar footer */
 .sidebar-footer {
     position: sticky;
@@ -609,4 +597,4 @@ body {
 .chat-history {
     height: calc(100vh - 130px);
     overflow-y: auto;
-} 
+}
