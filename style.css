@@ -180,11 +180,15 @@ body {
 }
 
 .chat-header {
+    position: sticky;
+    top: 0;
+    background-color: var(--background-dark);
     padding: 20px;
-    background-color: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 10;
+    width: 100%;
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 15px;
 }
 
@@ -421,6 +425,52 @@ body {
 
     .message code {
         font-size: 0.85em;
+    }
+
+    /* Mobile specific header adjustments */
+    .chat-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        padding: 15px 15px 15px 60px; /* Added left padding for menu button */
+        background-color: var(--background-dark);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .mobile-menu-btn {
+        display: block;
+        position: fixed;
+        top: 12px;
+        left: 15px;
+        z-index: 1001;
+        background: none;
+        border: none;
+        color: var(--text-color);
+        font-size: 1.5em;
+        padding: 10px;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+    }
+
+    .mobile-menu-btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Adjust main content to account for fixed header */
+    .main-content {
+        padding-top: 60px;
+    }
+
+    /* Ensure sidebar appears above header */
+    .sidebar {
+        z-index: 1002;
     }
 }
 

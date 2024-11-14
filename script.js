@@ -66,7 +66,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Close sidebar on mobile after selecting a chat
         if (window.innerWidth <= 768) {
-            document.querySelector('.sidebar').classList.remove('active');
+            const sidebar = document.querySelector('.sidebar');
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            sidebar.classList.remove('active');
+            menuBtn.style.backgroundColor = '';
         }
     }
 
@@ -289,16 +292,26 @@ Please provide a response that takes into account the previous context.`;
     // Add these functions for mobile support
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
+        const menuBtn = document.querySelector('.mobile-menu-btn');
+        
         sidebar.classList.toggle('active');
+        
+        // Optional: Add visual feedback for the menu button
+        if (sidebar.classList.contains('active')) {
+            menuBtn.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+        } else {
+            menuBtn.style.backgroundColor = '';
+        }
     }
 
     // Close sidebar when clicking outside
     document.addEventListener('click', (e) => {
         const sidebar = document.querySelector('.sidebar');
-        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const menuBtn = document.querySelector('.mobile-menu-btn');
         
-        if (!sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+        if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
             sidebar.classList.remove('active');
+            menuBtn.style.backgroundColor = '';
         }
     });
 
@@ -314,7 +327,10 @@ Please provide a response that takes into account the previous context.`;
         
         // Close sidebar on mobile after selecting a chat
         if (window.innerWidth <= 768) {
-            document.querySelector('.sidebar').classList.remove('active');
+            const sidebar = document.querySelector('.sidebar');
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            sidebar.classList.remove('active');
+            menuBtn.style.backgroundColor = '';
         }
     }
 
