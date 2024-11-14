@@ -63,6 +63,11 @@ document.addEventListener('DOMContentLoaded', () => {
             chat.messages.forEach(msg => addMessage(msg.text, msg.isUser));
         }
         updateChatHistory();
+        
+        // Close sidebar on mobile after selecting a chat
+        if (window.innerWidth <= 768) {
+            document.querySelector('.sidebar').classList.remove('active');
+        }
     }
 
     function addMessage(message, isUser = false) {
@@ -208,7 +213,8 @@ Please provide a response that takes into account the previous context.`;
 
     function adjustTextareaHeight() {
         userInput.style.height = 'auto';
-        userInput.style.height = Math.min(userInput.scrollHeight, 200) + 'px';
+        const maxHeight = window.innerWidth <= 768 ? 100 : 200;
+        userInput.style.height = Math.min(userInput.scrollHeight, maxHeight) + 'px';
     }
 
     // Event Listeners
@@ -279,4 +285,43 @@ Please provide a response that takes into account the previous context.`;
             });
         }
     });
+
+    // Add these functions for mobile support
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        sidebar.classList.toggle('active');
+    }
+
+    // Close sidebar when clicking outside
+    document.addEventListener('click', (e) => {
+        const sidebar = document.querySelector('.sidebar');
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        
+        if (!sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+            sidebar.classList.remove('active');
+        }
+    });
+
+    // Close sidebar when selecting a chat (mobile)
+    function loadChat(chatId) {
+        currentChatId = chatId;
+        chatMessages.innerHTML = '';
+        const chat = chats[chatId];
+        if (chat) {
+            chat.messages.forEach(msg => addMessage(msg.text, msg.isUser));
+        }
+        updateChatHistory();
+        
+        // Close sidebar on mobile after selecting a chat
+        if (window.innerWidth <= 768) {
+            document.querySelector('.sidebar').classList.remove('active');
+        }
+    }
+
+    // Adjust textarea height on mobile
+    function adjustTextareaHeight() {
+        userInput.style.height = 'auto';
+        const maxHeight = window.innerWidth <= 768 ? 100 : 200;
+        userInput.style.height = Math.min(userInput.scrollHeight, maxHeight) + 'px';
+    }
 }); 
