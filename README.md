@@ -38,7 +38,7 @@ A modern, responsive **ChatGPT Clone** built with **HTML**, **CSS**, and **JavaS
 **1. Clone the repository**
 ```
 git clone https://github.com/vaibhavk10/ChatGpt-Clone.git
-
+```
 
 **2. Open the `index.html` file**
 
