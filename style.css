@@ -31,7 +31,7 @@ body {
     background-color: var(--background-dark);
 }
 
-
+/* Sidebar Styles */
 .sidebar {
     width: 260px;
     display: flex;
@@ -77,7 +77,7 @@ body {
     padding: 15px;
 }
 
-
+/* History item styles */
 .history-item {
     display: flex;
     justify-content: space-between;
@@ -175,7 +175,7 @@ body {
     color: white;
 }
 
-
+/* Main Content Styles */
 .main-content {
     flex: 1;
     display: flex;
@@ -302,13 +302,13 @@ body {
     background-color: var(--secondary-color);
 }
 
-
+/* Animations */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-
+/* Scrollbar Styles */
 ::-webkit-scrollbar {
     width: 8px;
 }
@@ -326,7 +326,7 @@ body {
     background: rgba(255, 255, 255, 0.3);
 }
 
-
+/* Loading indicator */
 .typing-dots {
     display: flex;
     gap: 4px;
@@ -352,12 +352,12 @@ body {
     40% { transform: translateY(-4px); }
 }
 
-
+/* Mobile Responsiveness */
 @media (max-width: 768px) {
     .sidebar {
         position: fixed;
         top: 0;
-        left: -260px; 
+        left: -260px; /* Hide by default */
         height: 100%;
         width: 260px;
         z-index: 1000;
@@ -369,7 +369,7 @@ body {
         left: 0;
     }
 
-    
+    /* Add hamburger menu button */
     .mobile-menu-btn {
         display: flex;
         position: fixed;
@@ -388,47 +388,48 @@ body {
         justify-content: center;
     }
 
-    
+    /* Main content adjustments */
     .main-content {
         width: 100%;
-        padding-bottom: 1px; 
+        padding-bottom: 1px; /* Make space for input area */
     }
 
-    
+    /* Chat container adjustments */
     .chat-container {
-        height: calc(100vh - 120px); 
-        padding-bottom: 40px; 
+        height: calc(100vh - 120px); /* Reduced height to make room for input */
+        padding-bottom: 40px; /* Add padding to prevent content from being hidden behind input */
     }
 
-    
+    /* Chat messages container */
     .chat-messages {
-        height: calc(100vh - 180px); 
-        padding-bottom: 40px; 
+        height: calc(100vh - 180px); /* Adjust height to prevent overlap */
+        padding-bottom: 40px; /* Add padding to prevent content from being hidden */
     }
 
-    
+    /* Message adjustments */
     .message {
         max-width: 90%;
         padding: 12px 15px;
     }
 
-    
+    /* Input area adjustments */
     .chat-input {
         position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
-        background-color: var(--background-dark);
         padding: 10px 15px;
-        z-index: 1000;
-        border-top: 1px solid var(--border-color);
+        background-color: var(--background-dark);
         box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 1000; /* Ensure it's above other elements */
+        margin: 0;
+        border-top: 1px solid var(--border-color);
     }
 
     #user-input {
+        padding: 12px;
         max-height: 100px;
-        min-height: 45px;
-        overflow-y: auto;
+        min-height: 40px;
     }
 
     #send-button {
@@ -436,7 +437,7 @@ body {
         min-width: 60px;
     }
 
-    
+    /* Code block adjustments */
     .message pre {
         max-width: calc(100vw - 60px);
         overflow-x: auto;
@@ -446,13 +447,13 @@ body {
         font-size: 0.85em;
     }
 
-    
+    /* Mobile specific header adjustments */
     .chat-header {
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
-        padding: 15px 15px 15px 60px; 
+        padding: 15px 15px 15px 60px; /* Added left padding for menu button */
         background-color: var(--background-dark);
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
@@ -479,42 +480,23 @@ body {
         background-color: rgba(255, 255, 255, 0.1);
     }
 
-    
+    /* Adjust main content to account for fixed header */
     .main-content {
         padding-top: 60px;
-        padding-bottom: 20px; 
+        padding-bottom: 20px; /* Add padding to prevent content from being hidden */
     }
 
-    
+    /* Ensure sidebar appears above header */
     .sidebar {
         z-index: 1002;
     }
-
-    
-    .chat-messages {
-        padding-bottom: 80px; 
-        height: calc(100vh - 120px);
-        overflow-y: auto;
-    }
-
-    
-    .main-content {
-        padding-bottom: 70px; 
-    }
-
-    
-    .chat-container {
-        height: 100%;
-        overflow-y: auto;
-        padding-bottom: 60px; 
-    }
 }
 
-
+/* Add these new styles for better mobile support */
 @media (max-width: 480px) {
     .chat-header {
         padding: 15px;
-        margin-left: 50px; 
+        margin-left: 50px; /* Space for menu button */
     }
 
     .chat-header h2 {
@@ -549,12 +531,12 @@ body {
     }
 }
 
-
+/* Hide hamburger menu in desktop view */
 .mobile-menu-btn {
-    display: none; 
+    display: none; /* Hidden by default */
 }
 
-
+/* Only show hamburger menu in mobile view */
 @media (max-width: 768px) {
     .mobile-menu-btn {
         display: flex;
@@ -575,7 +557,7 @@ body {
     }
 }
 
-
+/* Fix the bottom input area */
 .chat-input {
     position: sticky;
     bottom: 0;
@@ -603,7 +585,7 @@ body {
     font-size: 1em;
 }
 
-
+/* Fix the sidebar footer */
 .sidebar-footer {
     position: sticky;
     bottom: 0;
@@ -626,7 +608,7 @@ body {
     font-size: 1em;
 }
 
-
+/* Adjust containers to account for fixed footer heights */
 .chat-container {
     height: calc(100vh - 130px);
 }
