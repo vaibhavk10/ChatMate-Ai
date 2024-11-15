@@ -397,13 +397,13 @@ body {
     /* Chat container adjustments */
     .chat-container {
         height: calc(100vh - 120px); /* Reduced height to make room for input */
-        padding-bottom: 70px; /* Add padding to prevent content from being hidden behind input */
+        padding-bottom: 40px; /* Add padding to prevent content from being hidden behind input */
     }
 
     /* Chat messages container */
     .chat-messages {
         height: calc(100vh - 180px); /* Adjust height to prevent overlap */
-        padding-bottom: 80px; /* Add padding to prevent content from being hidden */
+        padding-bottom: 40px; /* Add padding to prevent content from being hidden */
     }
 
     /* Message adjustments */
@@ -483,7 +483,7 @@ body {
     /* Adjust main content to account for fixed header */
     .main-content {
         padding-top: 60px;
-        padding-bottom: 60px; /* Add padding to prevent content from being hidden */
+        padding-bottom: 20px; /* Add padding to prevent content from being hidden */
     }
 
     /* Ensure sidebar appears above header */
