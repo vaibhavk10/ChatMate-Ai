@@ -290,7 +290,7 @@ Please provide a response that takes into account the previous context.`;
     });
 
     // Add these functions for mobile support
-    function toggleSidebar() {
+    window.toggleSidebar = function() {
         const sidebar = document.querySelector('.sidebar');
         const menuBtn = document.querySelector('.mobile-menu-btn');
         
