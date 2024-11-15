@@ -231,7 +231,12 @@ Please provide a response that takes into account the previous context.`;
     function adjustTextareaHeight() {
         userInput.style.height = 'auto';
         const maxHeight = window.innerWidth <= 768 ? 100 : 200;
-        userInput.style.height = Math.min(userInput.scrollHeight, maxHeight) + 'px';
+        const newHeight = Math.min(userInput.scrollHeight, maxHeight);
+        userInput.style.height = newHeight + 'px';
+        
+        // Keep the input area at the bottom
+        const chatContainer = document.querySelector('.chat-container');
+        chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
     // Event Listeners
