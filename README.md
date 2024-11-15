@@ -2,7 +2,7 @@
 
 ![Live Demo](https://img.shields.io/badge/Live%20Demo-Github%20Pages-brightgreen)
 
-Welcome to **ChatMate-AI**, a modern, responsive **ChatGPT Clone** powered by **Google's Gemini API**. This project features a sleek interface, chat history management, and a mobile-friendly design, ensuring a great experience for users. 
+Welcome to **ChatMate-AI**, a modern, responsive Ai powered by **Google's Gemini API**. This project features a sleek interface, chat history management, and a mobile-friendly design, ensuring a great experience for users. 
 
 ## Features
 
@@ -37,7 +37,7 @@ Welcome to **ChatMate-AI**, a modern, responsive **ChatGPT Clone** powered by **
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/vaibhavk10/ChatGpt-Clone.git
+git clone https://github.com/vaibhavk10/ChatMate-Ai.git
 ```
 
 **2. Open the `index.html` file**
@@ -48,9 +48,9 @@ After cloning, open the `index.html` file in your browser to start chatting.
 
 ### Live Demo
 
-Check out the live demo hosted on GitHub Pages:
-
-[Live Demo](https://vaibhavk10.github.io/ChatMate-Ai/)
+<a href="https://vaibhavk10.github.io/ChatMate-Ai/" target="_blank">
+  <img src="https://img.shields.io/badge/Live%20Demo-Click%20Here-orange?style=for-the-badge" alt="Live Demo Button"/>
+</a>
 
 ### Author
 
