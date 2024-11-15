@@ -64,7 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         updateChatHistory();
         
-        // Close sidebar on mobile after selecting a chat
         if (window.innerWidth <= 768) {
             const sidebar = document.querySelector('.sidebar');
             const menuBtn = document.querySelector('.mobile-menu-btn');
@@ -80,18 +79,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (message.includes('```')) {
             const formattedMessage = message.split('```').map((part, index) => {
-                if (index % 2 === 1) { // This is a code block
+                if (index % 2 === 1) { 
                     const lines = part.trim().split('\n');
                     let language = '';
                     let code = part.trim();
                     
-                    // Extract language if specified
                     if (lines[0] && !lines[0].includes('<') && !lines[0].includes('{') && !lines[0].includes('(')) {
                         language = lines[0];
                         code = lines.slice(1).join('\n');
                     }
 
-                    // Escape HTML characters in code blocks
                     code = code
                         .replace(/&/g, '&amp;')
                         .replace(/</g, '&lt;')
@@ -101,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     return `<pre><code class="language-${language}">${code}</code></pre>`;
                 }
-                // Escape HTML in regular text as well
+                
                 return part
                     .replace(/&/g, '&amp;')
                     .replace(/</g, '&lt;')
@@ -112,7 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }).join('');
             messageDiv.innerHTML = formattedMessage;
         } else {
-            // Escape HTML in regular text
             message = message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             messageDiv.innerHTML = message
                 .replace(/&/g, '&amp;')
@@ -167,7 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 content: message
             });
 
-            // Enhanced prompt for code requests
             let enhancedMessage = message;
             if (message.toLowerCase().includes('html') || 
                 message.toLowerCase().includes('css') || 
@@ -234,7 +229,6 @@ Please provide a response that takes into account the previous context.`;
         const newHeight = Math.min(userInput.scrollHeight, maxHeight);
         userInput.style.height = newHeight + 'px';
         
-        // Keep the input area at the bottom
         const chatContainer = document.querySelector('.chat-container');
         chatContainer.scrollTop = chatContainer.scrollHeight;
     }
@@ -269,7 +263,6 @@ Please provide a response that takes into account the previous context.`;
         }
     });
 
-    // Make these functions available globally
     window.loadChat = loadChat;
     window.toggleHistoryMenu = function(chatId) {
         event.stopPropagation();
@@ -299,7 +292,6 @@ Please provide a response that takes into account the previous context.`;
         }
     };
 
-    // Close menus when clicking outside
     document.addEventListener('click', (event) => {
         if (!event.target.closest('.history-menu') && !event.target.closest('.history-menu-button')) {
             document.querySelectorAll('.history-menu-content.active').forEach(menu => {
@@ -308,22 +300,18 @@ Please provide a response that takes into account the previous context.`;
         }
     });
 
-    // Add these functions for mobile support
     window.toggleSidebar = function() {
         const sidebar = document.querySelector('.sidebar');
         const menuBtn = document.querySelector('.mobile-menu-btn');
         
         sidebar.classList.toggle('active');
         
-        // Optional: Add visual feedback for the menu button
         if (sidebar.classList.contains('active')) {
             menuBtn.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
         } else {
             menuBtn.style.backgroundColor = '';
         }
     }
-
-    // Close sidebar when clicking outside
     document.addEventListener('click', (e) => {
         const sidebar = document.querySelector('.sidebar');
         const menuBtn = document.querySelector('.mobile-menu-btn');
@@ -334,7 +322,6 @@ Please provide a response that takes into account the previous context.`;
         }
     });
 
-    // Close sidebar when selecting a chat (mobile)
     function loadChat(chatId) {
         currentChatId = chatId;
         chatMessages.innerHTML = '';
@@ -344,7 +331,6 @@ Please provide a response that takes into account the previous context.`;
         }
         updateChatHistory();
         
-        // Close sidebar on mobile after selecting a chat
         if (window.innerWidth <= 768) {
             const sidebar = document.querySelector('.sidebar');
             const menuBtn = document.querySelector('.mobile-menu-btn');
@@ -353,7 +339,6 @@ Please provide a response that takes into account the previous context.`;
         }
     }
 
-    // Adjust textarea height on mobile
     function adjustTextareaHeight() {
         userInput.style.height = 'auto';
         const maxHeight = window.innerWidth <= 768 ? 100 : 200;
