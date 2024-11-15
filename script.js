@@ -101,12 +101,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     return `<pre><code class="language-${language}">${code}</code></pre>`;
                 }
-                // Replace newlines with <br> for regular text
-                return part.replace(/\n/g, '<br>');
+                // Escape HTML in regular text as well
+                return part
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;')
+                    .replace(/\n/g, '<br>');
             }).join('');
             messageDiv.innerHTML = formattedMessage;
         } else {
-            messageDiv.innerHTML = message.replace(/\n/g, '<br>');
+            // Escape HTML in regular text
+            message = message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            messageDiv.innerHTML = message
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;')
+                .replace(/\n/g, '<br>');
         }
 
         chatMessages.appendChild(messageDiv);
