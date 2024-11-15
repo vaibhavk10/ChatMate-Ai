@@ -1,42 +1,42 @@
-## ChatGPT Clone
+# ChatMate-AI: A Modern Chatbot Powered by Google's Gemini API
 
-A modern, responsive **ChatGPT Clone** built with **HTML**, **CSS**, and **JavaScript**, powered by **Google's Gemini API**. This project features a clean interface, chat history management, and a responsive design.
+![Live Demo](https://img.shields.io/badge/Live%20Demo-Github%20Pages-brightgreen)
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Github%20Pages-brightgreen)](https://vaibhavk10.github.io/ChatGpt-Clone/)
+Welcome to **ChatMate-AI**, a modern, responsive **ChatGPT Clone** powered by **Google's Gemini API**. This project features a sleek interface, chat history management, and a mobile-friendly design, ensuring a great experience for users. 
 
-### Features
+## Features
 
-**Core Functionality**
-- **Real-time Chat** Interface with AI responses
-- **Chat History Management** (View, Delete, Clear All)
-- **New Chat** Creation
-- **Persistent Storage** using `localStorage`
+### Core Functionality
+- **Real-time Chat Interface** with instant AI responses.
+- **Chat History Management**: View, Delete, and Clear All previous conversations.
+- **New Chat Creation**: Start fresh whenever you like.
+- **Persistent Storage**: Chat history saved using `localStorage`.
 
-**User Interface**
-- **Modern Design** with dark theme
-- **Responsive Layout** (Mobile-friendly)
-- **Smooth Animations** and **Loading Indicators**
-- **Custom Scrollbar**
+### User Interface
+- **Modern Dark Theme** with elegant styling.
+- **Responsive Layout**: Optimized for mobile and desktop.
+- **Smooth Animations** and **Loading Indicators** for a seamless experience.
+- **Custom Scrollbar** for improved navigation.
 
-**Technical Features**
-- **Code Block Support**
-- **Error Handling**
-- **Context Maintenance**
-- **Message Formatting**
-- **Local Storage Integration** for chat history persistence
+### Technical Features
+- **Code Block Support**: For displaying code snippets.
+- **Error Handling**: Robust system for managing errors.
+- **Context Maintenance**: Remember previous conversations.
+- **Message Formatting**: Styled messages for a cleaner look.
+- **Local Storage Integration**: Retain chat history even after page reloads.
 
-### Technologies Used
+## Technologies Used
 
 - **HTML5**
-- **CSS3**
-- **JavaScript**
+- **CSS3** (with Flexbox and Grid)
+- **JavaScript** (ES6+)
 - **Google's Gemini API**
-- **Font Awesome Icons** for UI
+- **Font Awesome Icons** for UI elements.
 
-### Setup and Usage
+## Setup and Usage
 
-**1. Clone the repository**
-```
+### 1. Clone the repository
+```bash
 git clone https://github.com/vaibhavk10/ChatGpt-Clone.git
 ```
 
@@ -50,7 +50,7 @@ After cloning, open the `index.html` file in your browser to start chatting.
 
 Check out the live demo hosted on GitHub Pages:
 
-[Live Demo](https://vaibhavk10.github.io/ChatGpt-Clone/)
+[Live Demo](https://vaibhavk10.github.io/ChatMate-Ai/)
 
 ### Author
 
