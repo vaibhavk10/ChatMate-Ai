@@ -89,34 +89,25 @@ document.addEventListener('DOMContentLoaded', () => {
                         code = lines.slice(1).join('\n');
                     }
 
-                    code = code
-                        .replace(/&/g, '&amp;')
-                        .replace(/</g, '&lt;')
-                        .replace(/>/g, '&gt;')
-                        .replace(/"/g, '&quot;')
-                        .replace(/'/g, '&#039;');
-
                     return `<pre><code class="language-${language}">${code}</code></pre>`;
                 }
                 
+                // Convert Markdown to HTML
                 return part
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&#039;')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold text
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')           // Italic text
+                    .replace(/\n\* /g, '\n• ')                      // Bullet points
                     .replace(/\n/g, '<br>');
             }).join('');
             messageDiv.innerHTML = formattedMessage;
         } else {
-            message = message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            messageDiv.innerHTML = message
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;')
+            // Convert Markdown to HTML for non-code messages
+            message = message
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')   // Bold text
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')             // Italic text
+                .replace(/\n\* /g, '\n• ')                        // Bullet points
                 .replace(/\n/g, '<br>');
+            messageDiv.innerHTML = message;
         }
 
         chatMessages.appendChild(messageDiv);

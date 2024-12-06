@@ -527,7 +527,7 @@ body {
     }
 
     .chat-input {
-        padding: 8px 12px;
+        padding: 12px 12px;
         gap: 8px;
     }
 
@@ -576,18 +576,7 @@ body {
 }
 
 
-.chat-input {
-    position: sticky;
-    bottom: 0;
-    padding: 15px 20px;
-    background-color: var(--background-dark);
-    display: flex;
-    gap: 15px;
-    align-items: center;
-    border-top: 1px solid var(--border-color);
-    margin: 0;
-    padding-bottom: 0.7rem;
-}
+z
 
 #user-input {
     flex-grow: 1;
