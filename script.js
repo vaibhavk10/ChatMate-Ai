@@ -175,7 +175,7 @@ Current request: ${enhancedMessage}
 
 Please provide a response that takes into account the previous context.`;
 
-            const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyBvRdM1ZfHL6XcXY4w1PM3OxBp4QdSTPSY', {
+            const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyCebss0E8U4xIVDvlWyy7aoHAfOb8RF-Ns', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
