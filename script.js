@@ -139,80 +139,76 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function sendMessage() {
-        const message = userInput.value.trim();
-        if (message === '') return;
+    const message = userInput.value.trim();
+    if (message === '') return;
 
-        addMessage(message, true);
-        userInput.value = '';
-        adjustTextareaHeight();
+    addMessage(message, true);
+    userInput.value = '';
+    adjustTextareaHeight();
 
-        const loadingDiv = addLoadingIndicator();
+    const loadingDiv = addLoadingIndicator();
 
-        try {
-            conversationHistory.push({
-                role: "user",
-                content: message
-            });
+    try {
+        conversationHistory.push({
+            role: "user",
+            content: message
+        });
 
-            let enhancedMessage = message;
-            if (message.toLowerCase().includes('html') || 
-                message.toLowerCase().includes('css') || 
-                message.toLowerCase().includes('javascript') ||
-                message.toLowerCase().includes('code')) {
-                enhancedMessage = `${message}
+        let enhancedMessage = message;
+        if (message.toLowerCase().includes('html') || 
+            message.toLowerCase().includes('css') || 
+            message.toLowerCase().includes('javascript') ||
+            message.toLowerCase().includes('code')) {
+            enhancedMessage = `${message}
 Please format your response as follows:
 1. Use \`\`\`html, \`\`\`css, or \`\`\`javascript code blocks
 2. Include complete, well-formatted code
 3. Add comments to explain key sections
 4. Ensure proper indentation
 5. For HTML, include a complete document structure with proper tags`;
-            }
+        }
 
-            const contextMessage = `Previous conversation context:
-${conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': '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' // 🔁 Replace this with your real API key
+            },
+            body: JSON.stringify({
+                model: 'gpt-3.5-turbo', // or "gpt-4"
+                messages: [
+                    ...conversationHistory.slice(-10),
+                    { role: "user", content: enhancedMessage }
+                ],
+                temperature: 0.7
+            })
+        });
 
-Current request: ${enhancedMessage}
+        const data = await response.json();
+        loadingDiv.remove();
 
-Please provide a response that takes into account the previous context.`;
+        if (data.choices && data.choices[0]?.message?.content) {
+            const botResponse = data.choices[0].message.content;
+            addMessage(botResponse);
 
-            const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyAUmTc3_hTpQvRdvXeEiWsGBKJb_-s-zzE', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [{
-                            text: contextMessage
-                        }]
-                    }]
-                })
+            conversationHistory.push({
+                role: "assistant",
+                content: botResponse
             });
 
-            const data = await response.json();
-            loadingDiv.remove();
-
-            if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
-                const botResponse = data.candidates[0].content.parts[0].text;
-                addMessage(botResponse);
-                
-                conversationHistory.push({
-                    role: "assistant",
-                    content: botResponse
-                });
-
-                if (conversationHistory.length > 10) {
-                    conversationHistory = conversationHistory.slice(-10);
-                }
-            } else {
-                throw new Error('Invalid response format');
+            if (conversationHistory.length > 10) {
+                conversationHistory = conversationHistory.slice(-10);
             }
-        } catch (error) {
-            console.error('Error:', error);
-            loadingDiv.remove();
-            addMessage('Sorry, I encountered an error. Please try again.');
+        } else {
+            throw new Error('Invalid response from OpenAI');
         }
+    } catch (error) {
+        console.error('Error:', error);
+        loadingDiv.remove();
+        addMessage('Sorry, I encountered an error. Please try again.');
     }
+}
+
 
     function adjustTextareaHeight() {
         userInput.style.height = 'auto';
