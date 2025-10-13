@@ -691,7 +691,23 @@ z
     background-color: var(--sidebar-bg);
     margin: 0;
     padding-bottom: 5;
-    margin-bottom: 50px;
+    /* margin-bottom: 50px; */
+}
+
+/* Mobile-specific positioning: raise sidebar footer 50px from bottom */
+@media (max-width: 768px) {
+    .sidebar-footer {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 50px; /* 50px above bottom like chat input spacing */
+        border-top: 1px solid var(--border-color);
+        background-color: var(--sidebar-bg);
+    }
+    /* Ensure history content isn't hidden behind the raised footer */
+    .chat-history {
+        padding-bottom: 120px;
+    }
 }
 
 .clear-history-btn {
