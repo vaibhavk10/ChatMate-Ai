@@ -607,6 +607,7 @@ body {
     .chat-input {
         padding: 12px 12px;
         gap: 8px;
+        margin-bottom: 30px;
     }
 
     #user-input {
