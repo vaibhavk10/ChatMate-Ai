@@ -139,76 +139,134 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function sendMessage() {
-    const message = userInput.value.trim();
-    if (message === '') return;
+        const message = userInput.value.trim();
+        if (message === '') return;
 
-    addMessage(message, true);
-    userInput.value = '';
-    adjustTextareaHeight();
+        addMessage(message, true);
+        userInput.value = '';
+        adjustTextareaHeight();
 
-    const loadingDiv = addLoadingIndicator();
+        const loadingDiv = addLoadingIndicator();
 
-    try {
-        conversationHistory.push({
-            role: "user",
-            content: message
-        });
+        try {
+            conversationHistory.push({
+                role: "user",
+                content: message
+            });
 
-        let enhancedMessage = message;
-        if (message.toLowerCase().includes('html') || 
-            message.toLowerCase().includes('css') || 
-            message.toLowerCase().includes('javascript') ||
-            message.toLowerCase().includes('code')) {
-            enhancedMessage = `${message}
+            // Try to get API key from environment or use a placeholder
+            const apiKey = 'AIzaSyBqCvFpQNJtBJaCEKB9vg9ZwS6p2d1eA24'; // Replace with your actual API key
+            
+            if (apiKey === 'YOUR_GEMINI_API_KEY_HERE') {
+                loadingDiv.remove();
+                addMessage(`🤖 **ChatMate AI Demo Mode**
+
+I'm currently running in demo mode. To enable full AI functionality, please:
+
+1. Get a free API key from Google AI Studio: https://makersuite.google.com/app/apikey
+2. Replace 'YOUR_GEMINI_API_KEY_HERE' in script.js with your actual API key
+3. Refresh the page
+
+**Demo Response to your message:** "${message}"
+
+This is a placeholder response. Once you add your API key, I'll be able to provide intelligent, contextual responses to all your questions!`);
+                return;
+            }
+
+            let enhancedMessage = message;
+            if (message.toLowerCase().includes('html') || 
+                message.toLowerCase().includes('css') || 
+                message.toLowerCase().includes('javascript') ||
+                message.toLowerCase().includes('code')) {
+                enhancedMessage = `${message}
 Please format your response as follows:
 1. Use \`\`\`html, \`\`\`css, or \`\`\`javascript code blocks
 2. Include complete, well-formatted code
 3. Add comments to explain key sections
 4. Ensure proper indentation
 5. For HTML, include a complete document structure with proper tags`;
-        }
+            }
 
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': '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' // 🔁 Replace this with your real API key
-            },
-            body: JSON.stringify({
-                model: 'gpt-3.5-turbo', // or "gpt-4"
-                messages: [
-                    ...conversationHistory.slice(-10),
-                    { role: "user", content: enhancedMessage }
-                ],
-                temperature: 0.7
-            })
-        });
+            const contextMessage = `Previous conversation context:
+${conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
 
-        const data = await response.json();
-        loadingDiv.remove();
+Current request: ${enhancedMessage}
 
-        if (data.choices && data.choices[0]?.message?.content) {
-            const botResponse = data.choices[0].message.content;
-            addMessage(botResponse);
+Please provide a response that takes into account the previous context.`;
 
-            conversationHistory.push({
-                role: "assistant",
-                content: botResponse
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{
+                            text: contextMessage
+                        }]
+                    }]
+                })
             });
 
-            if (conversationHistory.length > 10) {
-                conversationHistory = conversationHistory.slice(-10);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorText}`);
             }
-        } else {
-            throw new Error('Invalid response from OpenAI');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        loadingDiv.remove();
-        addMessage('Sorry, I encountered an error. Please try again.');
-    }
-}
 
+            const data = await response.json();
+            loadingDiv.remove();
+
+            if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+                const botResponse = data.candidates[0].content.parts[0].text;
+                addMessage(botResponse);
+                
+                conversationHistory.push({
+                    role: "assistant",
+                    content: botResponse
+                });
+
+                if (conversationHistory.length > 10) {
+                    conversationHistory = conversationHistory.slice(-10);
+                }
+            } else {
+                console.error('API Response Data:', data);
+                throw new Error(`Invalid response format from API. Response: ${JSON.stringify(data)}`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            loadingDiv.remove();
+            
+            if (error.message.includes('API Error')) {
+                addMessage(`🚨 **API Connection Error**
+
+There was an issue connecting to the AI service. This could be due to:
+
+• **Invalid API Key**: Please check your Gemini API key
+• **Rate Limiting**: You may have exceeded the API rate limit
+• **Network Issues**: Check your internet connection
+
+**Error Details:** ${error.message}
+
+Please try again in a few moments or check your API key configuration.`);
+            } else {
+                addMessage(`🤖 **ChatMate AI Response**
+
+I apologize, but I'm experiencing some technical difficulties right now. Here's what I can tell you about your message:
+
+**Your message:** "${message}"
+
+**Response:** This appears to be a test message. In a fully functional state, I would provide intelligent, contextual responses to help you with coding, general questions, and problem-solving.
+
+**Troubleshooting:**
+• Check your internet connection
+• Verify your API key is correctly configured
+• Try refreshing the page
+
+I'm here to help once the technical issues are resolved!`);
+            }
+        }
+    }
 
     function adjustTextareaHeight() {
         userInput.style.height = 'auto';
@@ -297,6 +355,64 @@ Please format your response as follows:
             menuBtn.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
         } else {
             menuBtn.style.backgroundColor = '';
+        }
+    }
+
+    // API Test Function
+    window.testAPI = async function() {
+        const apiKey = 'AIzaSyBqCvFpQNJtBJaCEKB9vg9ZwS6p2d1eA24';
+        
+        addMessage(`🧪 **API Test Starting...**
+        
+**Testing:** Gemini Pro API Connection
+**API Key:** ${apiKey.substring(0, 10)}...${apiKey.substring(apiKey.length - 4)}
+**Test Message:** "Hello, are you working?"`);
+
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{
+                            text: "Hello, are you working? Please respond with a simple greeting."
+                        }]
+                    }]
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+                    addMessage(`✅ **API Test PASSED!**
+                    
+**Status:** Your API key is working perfectly!
+**Response:** ${data.candidates[0].content.parts[0].text}
+**HTTP Status:** ${response.status}
+**Test Result:** SUCCESS 🎉`);
+                } else {
+                    addMessage(`❌ **API Test FAILED**
+                    
+**Issue:** Invalid response format
+**Response Data:** ${JSON.stringify(data)}
+**Test Result:** FAILED`);
+                }
+            } else {
+                const errorText = await response.text();
+                addMessage(`❌ **API Test FAILED**
+                
+**HTTP Status:** ${response.status}
+**Error:** ${response.statusText}
+**Details:** ${errorText}
+**Test Result:** FAILED`);
+            }
+        } catch (error) {
+            addMessage(`❌ **API Test FAILED**
+            
+**Error:** ${error.message}
+**Test Result:** FAILED`);
         }
     }
     document.addEventListener('click', (e) => {
