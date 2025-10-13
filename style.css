@@ -187,7 +187,7 @@ body {
     background-color: var(--sidebar-bg);
     border-top: 1px solid var(--border-color);
     padding: 10px 15px;
-    margin-bottom: 50px;
+    margin-bottom: 5px;
 }
 
 .clear-history-btn {
@@ -691,6 +691,7 @@ z
     background-color: var(--sidebar-bg);
     margin: 0;
     padding-bottom: 5;
+    margin-bottom: 50px;
 }
 
 .clear-history-btn {
