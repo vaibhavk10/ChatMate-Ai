@@ -14,6 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let conversationHistory = [];
     let recognition = null;
     let isListening = false;
+    let fullTranscript = '';
+    let sendTimeout = null;
+    let silenceTimeout = null;
 
     // Initialize voice recognition
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -25,44 +28,102 @@ document.addEventListener('DOMContentLoaded', () => {
 
         recognition.onstart = () => {
             isListening = true;
+            fullTranscript = '';
             startListeningButton.disabled = true;
             stopListeningButton.disabled = false;
-            addMessage('🎤 Voice recognition started. Speak now...', false);
+            startListeningButton.classList.add('listening');
+            // Removed status message to avoid spam
         };
 
         recognition.onresult = (event) => {
             let interimTranscript = '';
-            let finalTranscript = '';
+            let currentFinalTranscript = '';
+
+            // Clear any existing timeout
+            if (sendTimeout) {
+                clearTimeout(sendTimeout);
+                sendTimeout = null;
+            }
+            if (silenceTimeout) {
+                clearTimeout(silenceTimeout);
+                silenceTimeout = null;
+            }
 
             for (let i = event.resultIndex; i < event.results.length; i++) {
                 const transcript = event.results[i][0].transcript;
                 if (event.results[i].isFinal) {
-                    finalTranscript += transcript + ' ';
+                    currentFinalTranscript += transcript + ' ';
                 } else {
                     interimTranscript += transcript;
                 }
             }
 
-            if (finalTranscript) {
-                userInput.value = finalTranscript.trim();
-                adjustTextareaHeight();
-                sendMessage();
+            // Accumulate final transcripts
+            if (currentFinalTranscript) {
+                fullTranscript += currentFinalTranscript;
             }
+
+            // Don't update input field during voice recognition to avoid auto-typing
+            // const displayText = fullTranscript + interimTranscript;
+            // userInput.value = displayText.trim();
+            // adjustTextareaHeight();
+
+            // Set timeout to send message after 2 seconds of silence
+            silenceTimeout = setTimeout(() => {
+                if (fullTranscript.trim()) {
+                    sendMessage(fullTranscript.trim());
+                    fullTranscript = '';
+                }
+            }, 2000);
         };
 
         recognition.onerror = (event) => {
             console.error('Speech recognition error:', event.error);
             if (event.error === 'no-speech') {
-                addMessage('No speech detected. Please try again.', false);
+                // If we have transcript, send it silently
+                if (fullTranscript.trim()) {
+                    sendMessage(fullTranscript.trim());
+                    fullTranscript = '';
+                }
+                // Don't show "no speech" message to avoid spam
             } else if (event.error === 'not-allowed') {
-                addMessage('Microphone permission denied. Please enable microphone access.', false);
-            } else {
-                addMessage('Voice recognition error: ' + event.error, false);
+                // Only show permission error once
+                if (!isListening) {
+                    addMessage('Microphone permission denied. Please enable microphone access.', false);
+                }
+            } else if (event.error !== 'aborted' && event.error !== 'no-speech') {
+                // Only show other errors if not already stopped
+                if (isListening) {
+                    addMessage('Voice recognition error: ' + event.error, false);
+                }
             }
-            stopListening();
+            if (event.error !== 'no-speech') {
+                stopListening();
+            } else {
+                // Remove blinking on no-speech error if not listening
+                if (!isListening) {
+                    startListeningButton.classList.remove('listening');
+                }
+            }
         };
 
         recognition.onend = () => {
+            // Clear timeouts
+            if (sendTimeout) {
+                clearTimeout(sendTimeout);
+                sendTimeout = null;
+            }
+            if (silenceTimeout) {
+                clearTimeout(silenceTimeout);
+                silenceTimeout = null;
+            }
+
+            // Send accumulated transcript if any
+            if (fullTranscript.trim() && isListening) {
+                sendMessage(fullTranscript.trim());
+                fullTranscript = '';
+            }
+
             if (isListening) {
                 // Restart recognition if it was manually stopped
                 try {
@@ -70,6 +131,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (e) {
                     stopListening();
                 }
+            } else {
+                // Remove blinking if not listening anymore
+                startListeningButton.classList.remove('listening');
             }
         };
     } else {
@@ -92,10 +156,28 @@ document.addEventListener('DOMContentLoaded', () => {
     function stopListening() {
         if (recognition && isListening) {
             isListening = false;
+            
+            // Clear timeouts
+            if (sendTimeout) {
+                clearTimeout(sendTimeout);
+                sendTimeout = null;
+            }
+            if (silenceTimeout) {
+                clearTimeout(silenceTimeout);
+                silenceTimeout = null;
+            }
+
+            // Send accumulated transcript if any
+            if (fullTranscript.trim()) {
+                sendMessage(fullTranscript.trim());
+                fullTranscript = '';
+            }
+
             recognition.stop();
             startListeningButton.disabled = false;
             stopListeningButton.disabled = true;
-            addMessage('🎤 Voice recognition stopped.', false);
+            startListeningButton.classList.remove('listening');
+            // Removed status message to avoid spam
         }
     }
 
