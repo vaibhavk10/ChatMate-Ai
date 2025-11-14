@@ -592,7 +592,7 @@ body {
 
     .voice-controls {
         position: fixed;
-        bottom: 70px;
+        bottom: 30px;
         left: 0;
         right: 0;
         padding: 8px 15px;
@@ -616,7 +616,7 @@ body {
 
     .chat-input {
         position: fixed;
-        bottom: 128px;
+        bottom: 78px;
         left: 0;
         right: 0;
         padding: 10px 15px 8px 15px;
@@ -683,7 +683,7 @@ body {
     }
 
     .voice-controls {
-        bottom: 59px;
+        bottom: 25px;
         padding: 6px 12px;
         gap: 6px;
     }
@@ -696,7 +696,7 @@ body {
     }
 
     .chat-input {
-        bottom: 103px;
+        bottom: 59px;
         padding: 8px 12px 6px 12px;
         gap: 8px;
         border-bottom: none;
