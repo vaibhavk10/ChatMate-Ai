@@ -399,6 +399,21 @@ body {
     border-color: #00cc00;
 }
 
+.start-btn.listening {
+    animation: blinkButton 1s infinite;
+}
+
+@keyframes blinkButton {
+    0%, 100% {
+        opacity: 1;
+        background-color: #00ff00;
+    }
+    50% {
+        opacity: 0.5;
+        background-color: #00cc00;
+    }
+}
+
 .stop-btn {
     background-color: var(--accent-gray);
     color: var(--text-primary);
