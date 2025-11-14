@@ -3,12 +3,101 @@ document.addEventListener('DOMContentLoaded', () => {
     const userInput = document.getElementById('user-input');
     const sendButton = document.getElementById('send-button');
     const newChatButton = document.getElementById('new-chat');
+    const newConversationButton = document.getElementById('new-conversation');
     const clearHistoryButton = document.getElementById('clear-history');
     const chatHistory = document.getElementById('chat-history');
+    const startListeningButton = document.getElementById('start-listening');
+    const stopListeningButton = document.getElementById('stop-listening');
 
     let currentChatId = generateChatId();
     let chats = loadChats();
     let conversationHistory = [];
+    let recognition = null;
+    let isListening = false;
+
+    // Initialize voice recognition
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = () => {
+            isListening = true;
+            startListeningButton.disabled = true;
+            stopListeningButton.disabled = false;
+            addMessage('🎤 Voice recognition started. Speak now...', false);
+        };
+
+        recognition.onresult = (event) => {
+            let interimTranscript = '';
+            let finalTranscript = '';
+
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcript = event.results[i][0].transcript;
+                if (event.results[i].isFinal) {
+                    finalTranscript += transcript + ' ';
+                } else {
+                    interimTranscript += transcript;
+                }
+            }
+
+            if (finalTranscript) {
+                userInput.value = finalTranscript.trim();
+                adjustTextareaHeight();
+                sendMessage();
+            }
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            if (event.error === 'no-speech') {
+                addMessage('No speech detected. Please try again.', false);
+            } else if (event.error === 'not-allowed') {
+                addMessage('Microphone permission denied. Please enable microphone access.', false);
+            } else {
+                addMessage('Voice recognition error: ' + event.error, false);
+            }
+            stopListening();
+        };
+
+        recognition.onend = () => {
+            if (isListening) {
+                // Restart recognition if it was manually stopped
+                try {
+                    recognition.start();
+                } catch (e) {
+                    stopListening();
+                }
+            }
+        };
+    } else {
+        startListeningButton.disabled = true;
+        stopListeningButton.disabled = true;
+        console.warn('Speech recognition not supported in this browser');
+    }
+
+    function startListening() {
+        if (recognition && !isListening) {
+            try {
+                recognition.start();
+            } catch (e) {
+                console.error('Error starting recognition:', e);
+                addMessage('Error starting voice recognition. Please try again.', false);
+            }
+        }
+    }
+
+    function stopListening() {
+        if (recognition && isListening) {
+            isListening = false;
+            recognition.stop();
+            startListeningButton.disabled = false;
+            stopListeningButton.disabled = true;
+            addMessage('🎤 Voice recognition stopped.', false);
+        }
+    }
 
     // Initialize chat history
     updateChatHistory();
@@ -58,9 +147,23 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadChat(chatId) {
         currentChatId = chatId;
         chatMessages.innerHTML = '';
+        conversationHistory = [];
         const chat = chats[chatId];
         if (chat) {
-            chat.messages.forEach(msg => addMessage(msg.text, msg.isUser));
+            chat.messages.forEach(msg => {
+                addMessage(msg.text, msg.isUser);
+                if (!msg.isUser) {
+                    conversationHistory.push({
+                        role: "assistant",
+                        content: msg.text
+                    });
+                } else {
+                    conversationHistory.push({
+                        role: "user",
+                        content: msg.text
+                    });
+                }
+            });
         }
         updateChatHistory();
         
@@ -89,11 +192,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         code = lines.slice(1).join('\n');
                     }
 
-                    return `<pre><code class="language-${language}">${code}</code></pre>`;
+                    return `<pre><code class="language-${language}">${escapeHtml(code)}</code></pre>`;
                 }
                 
                 // Convert Markdown to HTML
-                return part
+                return escapeHtml(part)
                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold text
                     .replace(/\*(.*?)\*/g, '<em>$1</em>')           // Italic text
                     .replace(/\n\* /g, '\n• ')                      // Bullet points
@@ -102,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
             messageDiv.innerHTML = formattedMessage;
         } else {
             // Convert Markdown to HTML for non-code messages
-            message = message
+            message = escapeHtml(message)
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')   // Bold text
                 .replace(/\*(.*?)\*/g, '<em>$1</em>')             // Italic text
                 .replace(/\n\* /g, '\n• ')                        // Bullet points
@@ -116,13 +219,19 @@ document.addEventListener('DOMContentLoaded', () => {
         // Save to chat history
         if (!chats[currentChatId]) {
             chats[currentChatId] = {
-                title: message.slice(0, 30) + '...',
+                title: (isUser ? message : 'New Chat').slice(0, 30) + (message.length > 30 ? '...' : ''),
                 messages: []
             };
         }
         chats[currentChatId].messages.push({ text: message, isUser });
         saveChats();
         updateChatHistory();
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     function addLoadingIndicator() {
@@ -138,13 +247,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return loadingDiv;
     }
 
-    async function sendMessage() {
-        const message = userInput.value.trim();
+    async function sendMessage(messageText = null) {
+        const message = messageText || userInput.value.trim();
         if (message === '') return;
 
         addMessage(message, true);
-        userInput.value = '';
-        adjustTextareaHeight();
+        if (!messageText) {
+            userInput.value = '';
+            adjustTextareaHeight();
+        }
 
         const loadingDiv = addLoadingIndicator();
 
@@ -154,117 +265,74 @@ document.addEventListener('DOMContentLoaded', () => {
                 content: message
             });
 
-            // Try to get API key from environment or use a placeholder
-            const apiKey = 'AIzaSyBqCvFpQNJtBJaCEKB9vg9ZwS6p2d1eA24'; // Replace with your actual API key
-            
-            if (apiKey === 'YOUR_GEMINI_API_KEY_HERE') {
-                loadingDiv.remove();
-                addMessage(`🤖 **ChatMate AI Demo Mode**
+            // Build context message
+            const contextMessage = conversationHistory.length > 1 
+                ? `Previous conversation context:\n${conversationHistory.slice(0, -1).map(msg => `${msg.role}: ${msg.content}`).join('\n')}\n\nCurrent request: ${message}\n\nPlease provide a response that takes into account the previous context.`
+                : message;
 
-I'm currently running in demo mode. To enable full AI functionality, please:
+            // Use Shizo API
+            const apiUrl = `https://api.shizo.top/ai/gpt?apikey=shizo&query=${encodeURIComponent(contextMessage)}`;
 
-1. Get a free API key from Google AI Studio: https://makersuite.google.com/app/apikey
-2. Replace 'YOUR_GEMINI_API_KEY_HERE' in script.js with your actual API key
-3. Refresh the page
-
-**Demo Response to your message:** "${message}"
-
-This is a placeholder response. Once you add your API key, I'll be able to provide intelligent, contextual responses to all your questions!`);
-                return;
-            }
-
-            let enhancedMessage = message;
-            if (message.toLowerCase().includes('html') || 
-                message.toLowerCase().includes('css') || 
-                message.toLowerCase().includes('javascript') ||
-                message.toLowerCase().includes('code')) {
-                enhancedMessage = `${message}
-Please format your response as follows:
-1. Use \`\`\`html, \`\`\`css, or \`\`\`javascript code blocks
-2. Include complete, well-formatted code
-3. Add comments to explain key sections
-4. Ensure proper indentation
-5. For HTML, include a complete document structure with proper tags`;
-            }
-
-            const contextMessage = `Previous conversation context:
-${conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
-
-Current request: ${enhancedMessage}
-
-Please provide a response that takes into account the previous context.`;
-
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [{
-                            text: contextMessage
-                        }]
-                    }]
-                })
-            });
-
-            
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorText}`);
-            }
-
-            const data = await response.json();
-            loadingDiv.remove();
-
-            if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
-                const botResponse = data.candidates[0].content.parts[0].text;
-                addMessage(botResponse);
+            try {
+                const response = await fetch(apiUrl);
                 
-                conversationHistory.push({
-                    role: "assistant",
-                    content: botResponse
-                });
-
-                if (conversationHistory.length > 10) {
-                    conversationHistory = conversationHistory.slice(-10);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-            } else {
-                console.error('API Response Data:', data);
-                throw new Error(`Invalid response format from API. Response: ${JSON.stringify(data)}`);
+                
+                const data = await response.json();
+                
+                // Log the response for debugging
+                console.log('API Response:', data);
+                
+                loadingDiv.remove();
+
+                // Try multiple possible response formats
+                let botResponse = null;
+                
+                if (data && data.data && data.data.msg) {
+                    // Format: { data: { msg: "..." } }
+                    botResponse = data.data.msg;
+                } else if (data && data.msg) {
+                    // Format: { msg: "..." }
+                    botResponse = data.msg;
+                } else if (data && data.data && typeof data.data === 'string') {
+                    // Format: { data: "..." }
+                    botResponse = data.data;
+                } else if (data && data.message) {
+                    // Format: { message: "..." }
+                    botResponse = data.message;
+                } else if (data && data.response) {
+                    // Format: { response: "..." }
+                    botResponse = data.response;
+                } else if (typeof data === 'string') {
+                    // Format: "..." (direct string)
+                    botResponse = data;
+                }
+
+                if (botResponse) {
+                    addMessage(botResponse);
+                    conversationHistory.push({
+                        role: "assistant",
+                        content: botResponse
+                    });
+                    // Keep last 10 messages for context
+                    if (conversationHistory.length > 10) {
+                        conversationHistory = conversationHistory.slice(-10);
+                    }
+                } else {
+                    console.error('Unexpected response format:', data);
+                    addMessage(`Sorry, I received an unexpected response format. Response: ${JSON.stringify(data).substring(0, 200)}...`);
+                }
+            } catch (apiError) {
+                console.error('API Error:', apiError);
+                loadingDiv.remove();
+                addMessage(`Sorry, I encountered an error: ${apiError.message}. Please check your internet connection and try again.`);
             }
         } catch (error) {
             console.error('Error:', error);
             loadingDiv.remove();
-            
-            if (error.message.includes('API Error')) {
-                addMessage(`🚨 **API Connection Error**
-
-There was an issue connecting to the AI service. This could be due to:
-
-• **Invalid API Key**: Please check your Gemini API key
-• **Rate Limiting**: You may have exceeded the API rate limit
-• **Network Issues**: Check your internet connection
-
-**Error Details:** ${error.message}
-
-Please try again in a few moments or check your API key configuration.`);
-            } else {
-                addMessage(`🤖 **ChatMate AI Response**
-
-I apologize, but I'm experiencing some technical difficulties right now. Here's what I can tell you about your message:
-
-**Your message:** "${message}"
-
-**Response:** This appears to be a test message. In a fully functional state, I would provide intelligent, contextual responses to help you with coding, general questions, and problem-solving.
-
-**Troubleshooting:**
-• Check your internet connection
-• Verify your API key is correctly configured
-• Try refreshing the page
-
-I'm here to help once the technical issues are resolved!`);
-            }
+            addMessage('Sorry, I encountered an error. Please try again.');
         }
     }
 
@@ -273,13 +341,10 @@ I'm here to help once the technical issues are resolved!`);
         const maxHeight = window.innerWidth <= 768 ? 100 : 200;
         const newHeight = Math.min(userInput.scrollHeight, maxHeight);
         userInput.style.height = newHeight + 'px';
-        
-        const chatContainer = document.querySelector('.chat-container');
-        chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
     // Event Listeners
-    sendButton.addEventListener('click', sendMessage);
+    sendButton.addEventListener('click', () => sendMessage());
 
     userInput.addEventListener('input', adjustTextareaHeight);
 
@@ -297,6 +362,13 @@ I'm here to help once the technical issues are resolved!`);
         updateChatHistory();
     });
 
+    newConversationButton.addEventListener('click', () => {
+        currentChatId = generateChatId();
+        chatMessages.innerHTML = '';
+        conversationHistory = [];
+        updateChatHistory();
+    });
+
     clearHistoryButton.addEventListener('click', () => {
         if (confirm('Are you sure you want to clear all chat history?')) {
             chats = {};
@@ -307,6 +379,9 @@ I'm here to help once the technical issues are resolved!`);
             updateChatHistory();
         }
     });
+
+    startListeningButton.addEventListener('click', startListening);
+    stopListeningButton.addEventListener('click', stopListening);
 
     window.loadChat = loadChat;
     window.toggleHistoryMenu = function(chatId) {
@@ -358,63 +433,6 @@ I'm here to help once the technical issues are resolved!`);
         }
     }
 
-    // API Test Function
-    window.testAPI = async function() {
-        const apiKey = 'AIzaSyBqCvFpQNJtBJaCEKB9vg9ZwS6p2d1eA24';
-        
-        addMessage(`🧪 **API Test Starting...**
-        
-**Testing:** Gemini Pro API Connection
-**API Key:** ${apiKey.substring(0, 10)}...${apiKey.substring(apiKey.length - 4)}
-**Test Message:** "Hello, are you working?"`);
-
-        try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [{
-                            text: "Hello, are you working? Please respond with a simple greeting."
-                        }]
-                    }]
-                })
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
-                    addMessage(`✅ **API Test PASSED!**
-                    
-**Status:** Your API key is working perfectly!
-**Response:** ${data.candidates[0].content.parts[0].text}
-**HTTP Status:** ${response.status}
-**Test Result:** SUCCESS 🎉`);
-                } else {
-                    addMessage(`❌ **API Test FAILED**
-                    
-**Issue:** Invalid response format
-**Response Data:** ${JSON.stringify(data)}
-**Test Result:** FAILED`);
-                }
-            } else {
-                const errorText = await response.text();
-                addMessage(`❌ **API Test FAILED**
-                
-**HTTP Status:** ${response.status}
-**Error:** ${response.statusText}
-**Details:** ${errorText}
-**Test Result:** FAILED`);
-            }
-        } catch (error) {
-            addMessage(`❌ **API Test FAILED**
-            
-**Error:** ${error.message}
-**Test Result:** FAILED`);
-        }
-    }
     document.addEventListener('click', (e) => {
         const sidebar = document.querySelector('.sidebar');
         const menuBtn = document.querySelector('.mobile-menu-btn');
@@ -424,27 +442,4 @@ I'm here to help once the technical issues are resolved!`);
             menuBtn.style.backgroundColor = '';
         }
     });
-
-    function loadChat(chatId) {
-        currentChatId = chatId;
-        chatMessages.innerHTML = '';
-        const chat = chats[chatId];
-        if (chat) {
-            chat.messages.forEach(msg => addMessage(msg.text, msg.isUser));
-        }
-        updateChatHistory();
-        
-        if (window.innerWidth <= 768) {
-            const sidebar = document.querySelector('.sidebar');
-            const menuBtn = document.querySelector('.mobile-menu-btn');
-            sidebar.classList.remove('active');
-            menuBtn.style.backgroundColor = '';
-        }
-    }
-
-    function adjustTextareaHeight() {
-        userInput.style.height = 'auto';
-        const maxHeight = window.innerWidth <= 768 ? 100 : 200;
-        userInput.style.height = Math.min(userInput.scrollHeight, maxHeight) + 'px';
-    }
-}); 
+});
